@@ -19,28 +19,28 @@
             
             <nav class="sidebar-menu">
                 <ul>
-                    <li class="active">
-                        <a href="#" data-target="tong-quan">
+                    <li class="menu-item active">
+                        <a href="javascript:void(0)" data-url="../Tong_Quan/tong_quan.php">
                             <i class="fa-solid fa-chart-pie"></i> Tổng quan
                         </a>
                     </li>
-                    <li>
-                        <a href="../QL_Dia_Diem/index.php" data-target="ql-dia-diem">
+                    <li class="menu-item">
+                        <a href="javascript:void(0)" data-url="../QL_Dia_Diem/quan_ly_dia_diem.php">
                             <i class="fa-solid fa-map-location-dot"></i> Quản lý Địa điểm
                         </a>
                     </li>
-                    <li>
-                        <a href="../QL_Danh_Muc/index.php" data-target="ql-danh-muc">
+                    <li class="menu-item">
+                        <a href="javascript:void(0)" data-url="../QL_Danh_Muc/quan_ly_danh_muc.php">
                             <i class="fa-solid fa-tags"></i> Quản lý Danh mục
                         </a>
                     </li>
-                    <li>
-                        <a href="../QL_Danh_Gia/index.php" data-target="ql-danh-gia">
+                    <li class="menu-item">
+                        <a href="javascript:void(0)" data-url="../QL_Danh_Gia/quan_ly_danh_gia.php">
                             <i class="fa-solid fa-star"></i> Quản lý Đánh giá
                         </a>
                     </li>
-                    <li>
-                        <a href="../QL_Tai_Khoan/index.php" data-target="ql-tai-khoan">
+                    <li class="menu-item">
+                        <a href="javascript:void(0)" data-url="../QL_Tai_Khoan/quan_ly_tai_khoan.php">
                             <i class="fa-solid fa-users"></i> Quản lý Tài khoản
                         </a>
                     </li>
@@ -64,84 +64,11 @@
                 </div>
             </header>
 
-            <div class="content-body">
-                
-                <div class="stats-grid">
-                    <div class="stat-card card-blue">
-                        <div class="stat-info">
-                            <h3>142</h3>
-                            <p>Địa điểm du lịch</p>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-hotel"></i>
-                        </div>
-                    </div>
-
-                    <div class="stat-card card-green">
-                        <div class="stat-info">
-                            <h3>12,450</h3>
-                            <p>Lượt check-in / Tìm kiếm</p>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-plane-departure"></i>
-                        </div>
-                    </div>
-
-                    <div class="stat-card card-orange">
-                        <div class="stat-info">
-                            <h3>4.8 ★</h3>
-                            <p>Đánh giá trung bình</p>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-heart"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="data-section">
-                    <div class="section-header">
-                        <h2><i class="fa-solid fa-umbrella-beach"></i> Địa điểm nổi bật vừa cập nhật</h2>
-                        <button class="btn-add"><i class="fa-solid fa-plus"></i> Thêm địa điểm</button>
-                    </div>
-                    
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Hình ảnh</th>
-                                <th>Tên địa điểm</th>
-                                <th>Vùng miền</th>
-                                <th>Trạng thái</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#01</td>
-                                <td><img src="https://picsum.photos/id/1015/60/40" alt="Vịnh Hạ Long" class="table-img"></td>
-                                <td><strong>Vịnh Hạ Long</strong></td>
-                                <td>Quảng Ninh</td>
-                                <td><span class="badge badge-active">Đang hiển thị</span></td>
-                                <td>
-                                    <button class="btn-action btn-edit"><i class="fa-solid fa-pen"></i></button>
-                                    <button class="btn-action btn-delete"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>#02</td>
-                                <td><img src="https://picsum.photos/id/1016/60/40" alt="Phú Quốc" class="table-img"></td>
-                                <td><strong>Đảo Ngọc Phú Quốc</strong></td>
-                                <td>Kiên Giang</td>
-                                <td><span class="badge badge-active">Đang hiển thị</span></td>
-                                <td>
-                                    <button class="btn-action btn-edit"><i class="fa-solid fa-pen"></i></button>
-                                    <button class="btn-action btn-delete"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
+            <div class="content-body" id="main-content-body">
+                <?php 
+                    // Mặc định load nội dung tổng quan lên khi mới vào trang
+                    include '../Tong_Quan/tong_quan.php'; 
+                ?>
             </div>
         </main>
 
