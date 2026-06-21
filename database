@@ -1,0 +1,62 @@
+-- ==========================================
+-- 1. KHỞI TẠO DATABASE
+-- ==========================================
+CREATE DATABASE IF NOT EXISTS DuLichDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE DuLichDB;
+
+-- ==========================================
+-- 2. TẠO CÁC BẢNG DỮ LIỆU
+-- ==========================================
+
+-- Phân hệ: QL_Tai_Khoan
+CREATE TABLE TaiKhoan (
+    MaTaiKhoan INT AUTO_INCREMENT PRIMARY KEY,
+    TenDangNhap VARCHAR(50) NOT NULL UNIQUE,
+    MatKhau VARCHAR(255) NOT NULL,
+    HoTen VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    SoDienThoai VARCHAR(15),
+    VaiTro VARCHAR(20) DEFAULT 'User', -- 'Admin' hoặc 'User'
+    TrangThai VARCHAR(20) DEFAULT 'Hoạt động', -- 'Hoạt động' hoặc 'Bị khóa'
+    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Phân hệ: QL_Danh_Muc (Đã bỏ cột hình ảnh, dùng COUNT để đếm địa điểm)
+CREATE TABLE DanhMuc (
+    MaDanhMuc INT AUTO_INCREMENT PRIMARY KEY,
+    TenDanhMuc VARCHAR(100) NOT NULL,
+    MoTa VARCHAR(500)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Phân hệ: QL_Dia_Diem
+CREATE TABLE DiaDiem (
+    MaDiaDiem INT AUTO_INCREMENT PRIMARY KEY,
+    TenDiaDiem VARCHAR(200) NOT NULL,
+    MaDanhMuc INT NOT NULL, -- Khóa ngoại liên kết tới bảng DanhMuc
+    VungMien VARCHAR(50),   -- Ví dụ: Miền Bắc, Miền Trung, Miền Nam
+    DiaChi VARCHAR(500) NOT NULL,
+    MoTaNgan VARCHAR(1000),
+    ChiTiet TEXT,           -- Lưu bài viết giới thiệu chi tiết về địa điểm
+    HinhAnhChinh VARCHAR(255), -- Đường dẫn file ảnh đại diện
+    NgayDang DATETIME DEFAULT CURRENT_TIMESTAMP,
+    LuotXem INT DEFAULT 0,
+    -- Ràng buộc: Khi xóa 1 Danh mục, tự động xóa tất cả Địa điểm thuộc danh mục đó (CASCADE)
+    CONSTRAINT FK_DiaDiem_DanhMuc FOREIGN KEY (MaDanhMuc) 
+        REFERENCES DanhMuc(MaDanhMuc) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Phân hệ: QL_Danh_Gia
+CREATE TABLE DanhGia (
+    MaDanhGia INT AUTO_INCREMENT PRIMARY KEY,
+    MaDiaDiem INT NOT NULL,   -- Đánh giá cho địa điểm nào?
+    MaTaiKhoan INT NOT NULL,  -- Ai là người đánh giá?
+    SoSao INT CHECK (SoSao >= 1 AND SoSao <= 5), -- Thang điểm từ 1 đến 5 sao
+    NoiDung TEXT,
+    NgayDanhGia DATETIME DEFAULT CURRENT_TIMESTAMP,
+    -- Ràng buộc: Khi xóa Địa điểm, xóa luôn các Đánh giá của địa điểm đó
+    CONSTRAINT FK_DanhGia_DiaDiem FOREIGN KEY (MaDiaDiem) 
+        REFERENCES DiaDiem(MaDiaDiem) ON DELETE CASCADE,
+    -- Ràng buộc: Không cho phép xóa Tài khoản nếu tài khoản đó đã viết đánh giá (Chống lỗi dữ liệu)
+    CONSTRAINT FK_DanhGia_TaiKhoan FOREIGN KEY (MaTaiKhoan) 
+        REFERENCES TaiKhoan(MaTaiKhoan) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
