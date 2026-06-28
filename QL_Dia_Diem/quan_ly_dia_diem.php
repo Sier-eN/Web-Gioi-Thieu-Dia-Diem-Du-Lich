@@ -1,3 +1,40 @@
+<?php
+$host = 'localhost';
+$dbname = 'DuLichDB';
+$username = 'root';
+$password = '';
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // --- 1. XỬ LÝ LỆNH XÓA ĐỊA ĐIỂM ---
+    if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+        $id = $_GET['id'];
+        $stmtDel = $conn->prepare("DELETE FROM DiaDiem WHERE MaDiaDiem = ?");
+        $stmtDel->execute([$id]);
+        echo "SUCCESS";
+        exit;
+    }
+
+    // --- 2. TRUY VẤN LẤY DANH SÁCH ĐỊA ĐIỂM (JOIN với bảng DanhMuc để lấy tên danh mục) ---
+    $sqlDiaDiem = "SELECT dd.*, dm.TenDanhMuc 
+                   FROM DiaDiem dd 
+                   INNER JOIN DanhMuc dm ON dd.MaDanhMuc = dm.MaDanhMuc 
+                   ORDER BY dd.NgayDang DESC";
+    $stmtDD = $conn->query($sqlDiaDiem);
+    $danhSachDiaDiem = $stmtDD->fetchAll(PDO::FETCH_ASSOC);
+
+    // --- 3. TRUY VẤN LẤY SẴN DANH MỤC (Để phục vụ đổ vào thẻ select trong Modal Form) ---
+    $stmtDM = $conn->query("SELECT MaDanhMuc, TenDanhMuc FROM DanhMuc ORDER BY TenDanhMuc ASC");
+    $danhSachDanhMuc = $stmtDM->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    echo 'Lỗi: ' . $e->getMessage();
+    exit;
+}
+?>
+
 <div class="data-section">
     <div class="section-header">
         <h2><i class="fa-solid fa-map-location-dot"></i> Hệ thống Quản lý Địa điểm</h2>
@@ -49,8 +86,7 @@
 </div>
 
 <div id="diaDiemModal" class="custom-modal" style="display:none;">
-    <div class="modal-content" style="width: 550px; margin: 4% auto;"> 
-        <h3 id="ddModalTitle"></h3>
+    <div class="modal-content" style="width: 550px; margin: 4% auto;"> <h3 id="ddModalTitle"></h3>
         
         <form id="formDiaDiem" onsubmit="saveDiaDiem(event)">
             <input type="hidden" id="dd_id" name="id">
