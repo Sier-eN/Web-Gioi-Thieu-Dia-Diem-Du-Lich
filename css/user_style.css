@@ -1,0 +1,235 @@
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f8fafc;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- NAVBAR PHÍA TRÊN --- */
+.navbar {
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 8%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #1e3d59;
+}
+
+.logo i {
+    color: #17b978;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.nav-links a {
+    font-weight: 500;
+    color: #475569;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover, .nav-links .active a {
+    color: #17b978;
+}
+
+.nav-auth .btn-auth {
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-login {
+    background: transparent;
+    color: #1e3d59;
+    border: 1px solid #1e3d59 !important;
+    margin-right: 10px;
+}
+
+.btn-login:hover {
+    background: #1e3d59;
+    color: #fff;
+}
+
+.btn-register {
+    background: #17b978;
+    color: white;
+}
+
+.btn-register:hover {
+    background: #139660;
+}
+
+/* --- HERO BANNER --- */
+.hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3)), url('https://picsum.photos/id/1015/1920/600') no-repeat center center/cover;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.hero h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero p {
+    font-size: 18px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* --- VÙNG HIỂN THỊ NỘI DUNG CHÍNH --- */
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    font-size: 26px;
+    color: #1e3d59;
+    margin-bottom: 25px;
+    border-left: 5px solid #17b978;
+    padding-left: 15px;
+}
+
+/* Giao diện Lưới địa điểm */
+.places-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.place-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    transition: transform 0.3s;
+}
+
+.place-card:hover {
+    transform: translateY(-5px);
+}
+
+.place-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.place-info {
+    padding: 20px;
+}
+
+.place-info h3 {
+    font-size: 18px;
+    color: #1e3d59;
+    margin-bottom: 8px;
+}
+
+.place-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 15px;
+}
+
+/* --- FORM AUTH (ĐĂNG NHẬP / ĐĂNG KÝ) --- */
+.auth-box {
+    background: #ffffff;
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.auth-box h2 {
+    color: #1e3d59;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.auth-box p {
+    font-size: 14px;
+    color: #64748b;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.auth-box a {
+    color: #17b978;
+    font-weight: 600;
+}
+
+/* Thêm định dạng form group và lỗi cho trang Auth */
+.form-group-user {
+    margin-bottom: 15px;
+}
+
+.form-group-user label {
+    display: block; 
+    margin-bottom: 6px; 
+    font-weight: 600;
+}
+
+.auth-error {
+    color: #ff4d4d; 
+    font-size: 14px; 
+    text-align: center; 
+    margin-bottom: 15px; 
+    display: none; 
+    font-weight: 600;
+}
+
+.btn-auth-submit {
+    width: 100%; 
+    padding: 12px; 
+    border: none; 
+    color: white; 
+    font-weight: 600; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    transition: background 0.3s;
+}
+
+.btn-bg-green { background: #17b978; }
+.btn-bg-green:hover { background: #139660; }
+.btn-bg-blue { background: #1e3d59; }
+.btn-bg-blue:hover { background: #132639; }
