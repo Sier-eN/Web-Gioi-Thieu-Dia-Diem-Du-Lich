@@ -1,3 +1,15 @@
+<?php
+// 1. KHỞI ĐỘNG SESSION ĐỂ KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// BẢO MẬT: Nếu chưa đăng nhập hoặc vai trò không phải Admin thì chặn lại, đuổi thẳng về trang chủ
+if (!isset($_SESSION['role']) || strcasecmp($_SESSION['role'], 'Admin') !== 0) {
+    header("Location: trang_chu_web.php");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -59,8 +71,8 @@
                     <p>Hôm nay là một ngày tuyệt vời để khám phá những điểm đến mới.</p>
                 </div>
                 <div class="user-profile">
-                    <img src="https://picsum.photos/40" alt="Avatar" class="avatar">
-                    <span>Nghĩa Admin</span>
+                    <img src="https://picsum.photos/id/1025/40/40" alt="Avatar" class="avatar">
+                    <span><?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?></span>
                 </div>
             </header>
 

@@ -63,20 +63,35 @@ if (session_status() === PHP_SESSION_NONE) {
                 $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 
-                // Truy vấn lấy dữ liệu địa điểm hiển thị trực quan kèm ảnh thật từ picsum để test giao diện du lịch
                 $stmt = $conn->query("SELECT dd.*, dm.TenDanhMuc FROM DiaDiem dd INNER JOIN DanhMuc dm ON dd.MaDanhMuc = dm.MaDanhMuc LIMIT 6");
-                $index = 1011; // ID bắt đầu để lấy ảnh ngẫu nhiên từ picsum
+                $index = 1011;
                 
                 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $imgUrl = !empty($row['HinhAnhChinh']) ? '../images/'.$row['HinhAnhChinh'] : 'https://picsum.photos/id/'.$index.'/300/180';
+                    // XỬ LÝ ẢNH AN TOÀN: Kiểm tra file tồn tại thực tế để chặn lỗi hiển thị số 1 làm lỗi giao diện
+                    $tenFileAnh = trim($row['HinhAnhChinh'] ?? '');
+                    $duongDanAnhThat = '../images/' . $tenFileAnh;
+
+                    if (!empty($tenFileAnh) && file_exists($duongDanAnhThat) && is_file($duongDanAnhThat)) {
+                        $imgUrl = $duongDanAnhThat;
+                    } else {
+                        // Nếu dính dữ liệu lỗi hoặc không tìm thấy file, tự động lấy ảnh demo/mặc định
+                        $imgUrl = '../images/default.jpg';
+                    }
+
                     echo '<div class="place-card">
                             <img src="'.$imgUrl.'" class="place-img" alt="'.htmlspecialchars($row['TenDiaDiem']).'">
                             <div class="place-info">
                                 <h3>'.htmlspecialchars($row['TenDiaDiem']).'</h3>
-                                <span style="font-size:12px; padding:3px 8px; background:#e3f2fd; color:#0d47a1; border-radius:12px;">'.htmlspecialchars($row['TenDanhMuc']).'</span>
-                                <div class="place-meta">
+                                <span style="font-size:12px; padding:3px 8px; background:#e3f2fd; color:#0d47a1; border-radius:12px; font-weight:600;">'.htmlspecialchars($row['TenDanhMuc']).'</span>
+                                <div class="place-meta" style="margin-bottom: 12px;">
                                     <span><i class="fa-solid fa-location-dot" style="color:#ff4d4d;"></i> '.htmlspecialchars($row['VungMien']).'</span>
                                     <span><i class="fa-regular fa-eye"></i> '.number_format($row['LuotXem']).'</span>
+                                </div>
+                                
+                                <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; text-align: right;">
+                                    <a href="javascript:void(0)" onclick="xemChiTietDiaDiem('.$row['MaDiaDiem'].')" style="color: #17b978; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block;">
+                                        Xem chi tiết <i class="fa-solid fa-arrow-right" style="font-size: 12px; margin-left: 4px;"></i>
+                                    </a>
                                 </div>
                             </div>
                           </div>';
@@ -93,11 +108,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <script src="../java_script/user_script.js"></script>
     
     <script>
-    // Hàm xử lý gọi Form Đăng nhập / Đăng ký từ file ngoài qua AJAX
     function loadAuthPage(type) {
-        // Khóa ẩn Banner Hero ngay lập tức để tránh form bị đẩy vỡ layout xuống dưới
         document.getElementById('hero-banner').style.display = 'none';
-        
         let url = type === 'login' ? 'login.php' : 'register.php';
         
         fetch(url)
@@ -113,23 +125,128 @@ if (session_status() === PHP_SESSION_NONE) {
             });
     }
 
-    // Xử lý hiệu ứng active và tải phân hệ điều hướng menu chính
+    // Xử lý AJAX điều hướng nạp file Card của riêng client
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', function() {
+            let page = this.getAttribute('data-page');
+            if (!page) return;
+
             document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
             this.parentElement.classList.add('active');
             
-            let page = this.getAttribute('data-page');
+            var contentZone = document.getElementById('user-content-body');
+            var heroBanner = document.getElementById('hero-banner');
+
             if(page === 'home') {
-                // Trở về trang chủ nguyên bản bằng cách làm mới
                 location.reload();
-            } else {
-                // Hiển thị lại Banner Hero khi rời khỏi biểu mẫu Auth
-                document.getElementById('hero-banner').style.display = 'flex';
-                document.getElementById('user-content-body').innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải phân hệ dữ liệu...</div>';
+            } else if(page === 'places') {
+                heroBanner.style.display = 'flex';
+                contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách địa điểm...</div>';
+                
+                fetch('user_places.php')
+                    .then(res => res.text())
+                    .then(html => { contentZone.innerHTML = html; })
+                    .catch(err => { contentZone.innerHTML = '<p style="color:red; text-align:center;">Lỗi: ' + err.message + '</p>'; });
+            } else if(page === 'categories') {
+                heroBanner.style.display = 'flex';
+                contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh mục...</div>';
+                
+                fetch('user_categories.php')
+                    .then(res => res.text())
+                    .then(html => { contentZone.innerHTML = html; })
+                    .catch(err => { contentZone.innerHTML = '<p style="color:red; text-align:center;">Lỗi: ' + err.message + '</p>'; });
             }
         });
     });
+
+    // Hàm xử lý gọi lọc động toàn bộ địa điểm khi click vào Card danh mục
+    function xemDiaDiemTheoDanhMuc(maDanhMuc) {
+        var contentZone = document.getElementById('user-content-body');
+        contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang lọc địa điểm thuộc danh mục...</div>';
+        
+        fetch('user_places.php?madanhmuc=' + maDanhMuc)
+            .then(res => res.text())
+            .then(html => {
+                contentZone.innerHTML = html;
+                window.scrollTo({ top: contentZone.offsetTop - 100, behavior: 'smooth' });
+            })
+            .catch(err => {
+                contentZone.innerHTML = '<p style="color:red; text-align:center;">Lỗi kết nối: ' + err.message + '</p>';
+            });
+    }
+
+    // Hàm nạp trang xem chi tiết địa điểm bằng AJAX
+    function xemChiTietDiaDiem(id) {
+        var contentZone = document.getElementById('user-content-body');
+        contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải nội dung chi tiết...</div>';
+        
+        fetch('user_place_detail.php?id=' + id)
+            .then(res => res.text())
+            .then(html => {
+                contentZone.innerHTML = html;
+                window.scrollTo({ top: contentZone.offsetTop - 100, behavior: 'smooth' });
+            })
+            .catch(err => {
+                contentZone.innerHTML = '<p style="color:red; text-align:center;">Lỗi: ' + err.message + '</p>';
+            });
+    }
+
+    // Hàm để bấm nút Quay lại từ trang chi tiết về danh sách địa điểm ban đầu
+    function quayLaiDanhSachDiaDiem() {
+        var contentZone = document.getElementById('user-content-body');
+        contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh sách...</div>';
+        
+        fetch('user_places.php')
+            .then(res => res.text())
+            .then(html => {
+                contentZone.innerHTML = html;
+            });
+    }
+    // Hàm AJAX gửi đánh giá và sao trực tiếp
+function guiDanhGiaMoi(event, maDiaDiem) {
+    event.preventDefault();
+    
+    var soSao = document.getElementById('dg_sao').value;
+    var noiDung = document.getElementById('dg_content').value;
+    var msgZone = document.getElementById('review_msg');
+    
+    msgZone.style.color = '#777';
+    msgZone.innerHTML = 'Hệ thống đang lưu đánh giá...';
+
+    var formData = new FormData();
+    formData.append('maDiaDiem', maDiaDiem);
+    formData.append('soSao', soSao);
+    formData.append('noiDung', noiDung);
+
+    fetch('xu_ly_danh_gia.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())
+    .then(data => {
+        if(data.trim() === 'SUCCESS') {
+            msgZone.style.color = '#17b978';
+            msgZone.innerHTML = '✓ Đăng đánh giá chấm điểm thành công!';
+            document.getElementById('dg_content').value = '';
+            
+            // Tải lại phân vùng đánh giá thời gian thực
+            fetch('user_place_detail.php?id=' + maDiaDiem)
+                .then(r => r.text())
+                .then(html => {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    document.getElementById('reviews_list_zone').innerHTML = doc.getElementById('reviews_list_zone').innerHTML;
+                });
+        } else {
+            msgZone.style.color = 'red';
+            msgZone.innerHTML = 'Lỗi: ' + data;
+        }
+    })
+    .catch(err => {
+        msgZone.style.color = 'red';
+        msgZone.innerHTML = 'Lỗi kết nối: ' + err.message;
+    });
+}
     </script>
 </body>
 </html>

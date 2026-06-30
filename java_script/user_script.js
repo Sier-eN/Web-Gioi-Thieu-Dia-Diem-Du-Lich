@@ -75,3 +75,51 @@ function handleUserRegister(e) {
     })
     .catch((err) => console.error("Lỗi hệ thống:", err));
 }
+
+// Xử lý hiệu ứng active và tải phân hệ điều hướng menu chính (ĐÃ SỬA)
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', function() {
+        let page = this.getAttribute('data-page');
+        
+        // Nếu click vào nút "Quản lý" (đi sang trang khác) thì không chặn mặc định
+        if (!page) return; 
+
+        document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+        this.parentElement.classList.add('active');
+        
+        var contentZone = document.getElementById('user-content-body');
+        var heroBanner = document.getElementById('hero-banner');
+
+        if(page === 'home') {
+            // Trở về trang chủ nguyên bản bằng cách reload
+            location.reload();
+        } else if(page === 'places') {
+            // HIỂN THỊ LẠI HERO BANNER NẾU MUỐN
+            heroBanner.style.display = 'flex';
+            contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách địa điểm...</div>';
+            
+            // Gọi AJAX lấy trực tiếp file quản lý địa điểm sang (hoặc file riêng của user nếu có)
+            fetch('/GTDDDL-clone/QL_Dia_Diem/quan_ly_dia_diem.php')
+                .then(res => res.text())
+                .then(html => {
+                    contentZone.innerHTML = html;
+                })
+                .catch(err => {
+                    contentZone.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Lỗi: ' + err.message + '</p>';
+                });
+        } else if(page === 'categories') {
+            heroBanner.style.display = 'flex';
+            contentZone.innerHTML = '<div style="padding:40px; text-align:center; color:#777;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh mục du lịch...</div>';
+            
+            // Gọi AJAX lấy file quản lý danh mục sang
+            fetch('/GTDDDL-clone/QL_Danh_Muc/quan_ly_danh_muc.php')
+                .then(res => res.text())
+                .then(html => {
+                    contentZone.innerHTML = html;
+                })
+                .catch(err => {
+                    contentZone.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Lỗi: ' + err.message + '</p>';
+                });
+        }
+    });
+});

@@ -157,7 +157,6 @@ function moKhoaTaiKhoan(id) {
     });
 }
 
-// CHỨC NĂNG XÓA VĨNH VIỄN (MỚI THÊM)
 function xoaHanTaiKhoan(id) {
   if (
     confirm(
@@ -187,155 +186,212 @@ function xoaHanTaiKhoan(id) {
 var dmUrl = "../QL_Danh_Muc/quan_ly_danh_muc.php";
 
 function openDanhMucModal() {
-    document.getElementById("dmModalTitle").innerHTML = '<i class="fa-solid fa-folder-plus"></i> Thêm Danh Mục Mới';
-    document.getElementById("formDanhMuc").reset();
-    document.getElementById("dm_id").value = "";
-    document.getElementById("danhMucModal").style.display = "block";
+  document.getElementById("dmModalTitle").innerHTML =
+    '<i class="fa-solid fa-folder-plus"></i> Thêm Danh Mục Mới';
+  document.getElementById("formDanhMuc").reset();
+  document.getElementById("dm_id").value = "";
+  document.getElementById("danhMucModal").style.display = "block";
 }
 
 function openEditDanhMucModal(id, ten, mota) {
-    document.getElementById("dmModalTitle").innerHTML = '<i class="fa-solid fa-folder-open"></i> Cập Nhật Danh Mục';
-    document.getElementById("dm_id").value = id;
-    document.getElementById("dm_ten").value = ten;
-    document.getElementById("dm_mota").value = mota;
-    document.getElementById("danhMucModal").style.display = "block";
+  document.getElementById("dmModalTitle").innerHTML =
+    '<i class="fa-solid fa-folder-open"></i> Cập Nhật Danh Mục';
+  document.getElementById("dm_id").value = id;
+  document.getElementById("dm_ten").value = ten;
+  document.getElementById("dm_mota").value = mota;
+  document.getElementById("danhMucModal").style.display = "block";
 }
 
 function closeDanhMucModal() {
-    document.getElementById("danhMucModal").style.display = "none";
+  document.getElementById("danhMucModal").style.display = "none";
 }
 
 function saveDanhMuc(e) {
-    e.preventDefault();
-    var formData = new FormData(document.getElementById("formDanhMuc"));
-    var data = new URLSearchParams(formData);
+  e.preventDefault();
+  var formData = new FormData(document.getElementById("formDanhMuc"));
+  var data = new URLSearchParams(formData);
 
-    fetch('../QL_Danh_Muc/luu_danh_muc.php', {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: data,
-    })
+  fetch("../QL_Danh_Muc/luu_danh_muc.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: data,
+  })
     .then((res) => res.text())
     .then((response) => {
-        if (response.trim() === "SUCCESS") {
-            closeDanhMucModal();
-            // Làm mới vùng content-body sang danh mục mới cập nhật
-            document.getElementById("main-content-body").innerHTML = '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh mục...</div>';
-            fetch(dmUrl).then((r) => r.text()).then((html) => {
-                document.getElementById("main-content-body").innerHTML = html;
-            });
-        } else {
-            alert("Có lỗi xảy ra: " + response);
-        }
+      if (response.trim() === "SUCCESS") {
+        closeDanhMucModal();
+        document.getElementById("main-content-body").innerHTML =
+          '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh mục...</div>';
+        fetch(dmUrl)
+          .then((r) => r.text())
+          .then((html) => {
+            document.getElementById("main-content-body").innerHTML = html;
+          });
+      } else {
+        alert("Có lỗi xảy ra: " + response);
+      }
     });
 }
 
 function xoaDanhMuc(id) {
-    if (confirm("LƯU Ý: Xóa danh mục này sẽ đồng thời xóa TẤT CẢ các địa điểm du lịch thuộc danh mục này! Bạn có chắc chắn muốn xóa?")) {
-        fetch(dmUrl + "?action=delete&id=" + id)
-            .then((res) => res.text())
-            .then((data) => {
-                if (data.trim() === "SUCCESS") {
-                    fetch(dmUrl).then((r) => r.text()).then((html) => (document.getElementById("main-content-body").innerHTML = html));
-                } else {
-                    alert("Không thể xóa: " + data);
-                }
-            });
-    }
+  if (
+    confirm(
+      "LƯU Ý: Xóa danh mục này sẽ đồng thời xóa TẤT CẢ các địa điểm du lịch thuộc danh mục này! Bạn có chắc chắn muốn xóa?",
+    )
+  ) {
+    fetch(dmUrl + "?action=delete&id=" + id)
+      .then((res) => res.text())
+      .then((data) => {
+        if (data.trim() === "SUCCESS") {
+          fetch(dmUrl)
+            .then((r) => r.text())
+            .then(
+              (html) =>
+                (document.getElementById("main-content-body").innerHTML = html),
+            );
+        } else {
+          alert("Không thể xóa: " + data);
+        }
+      });
+  }
 }
 
-
 // ==========================================
-// 4. CHỨC NĂNG QUẢN LÝ ĐỊA ĐIỂM (MODAL & AJAX)
+// 4. CHỨC NĂNG QUẢN LÝ ĐỊA ĐIỂM (MODAL & AJAX UPLOAD FILE)
 // ==========================================
 var ddUrl = "../QL_Dia_Diem/quan_ly_dia_diem.php";
 
-function openDiaDiemModal() {
-    document.getElementById("ddModalTitle").innerHTML = '<i class="fa-solid fa-map-location-dot"></i> Thêm Địa Điểm Du Lịch Mới';
-    document.getElementById("formDiaDiem").reset();
-    document.getElementById("dd_id").value = "";
-    document.getElementById("diaDiemModal").style.display = "block";
+// Hàm xử lý hiển thị ảnh preview nhỏ khi chọn file từ máy tính
+function previewImage(input) {
+  var preview = document.getElementById("img-preview");
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 
-function openEditDiaDiemModal(id, ten, madanhmuc, vungmien, diachi, motangan, chitiet, hinhanh) {
-    document.getElementById("ddModalTitle").innerHTML = '<i class="fa-solid fa-route"></i> Cập Nhật Địa Điểm Du Lịch';
-    document.getElementById("dd_id").value = id;
-    document.getElementById("dd_ten").value = ten;
-    document.getElementById("dd_danhmuc").value = madanhmuc;
-    document.getElementById("dd_vungmien").value = vungmien;
-    document.getElementById("dd_diachi").value = diachi;
-    document.getElementById("dd_hinhanh").value = hinhanh;
-    document.getElementById("dd_motangan").value = motangan;
-    document.getElementById("dd_chitiet").value = chitiet;
-    document.getElementById("diaDiemModal").style.display = "block";
+function openDiaDiemModal() {
+  document.getElementById("ddModalTitle").innerHTML =
+    '<i class="fa-solid fa-map-location-dot"></i> Thêm Địa Điểm Du Lịch Mới';
+  document.getElementById("formDiaDiem").reset();
+  document.getElementById("dd_id").value = "";
+  document.getElementById("dd_hinhanh_cu").value = "";
+  document.getElementById("img-preview").style.display = "none";
+  document.getElementById("diaDiemModal").style.display = "block";
+}
+
+// GIẢI PHÁP CHỐNG LỖI SỬA: Tiếp nhận chuỗi JSON an toàn từ index.php gửi sang
+function openEditDiaDiemModal(jsonDataRaw) {
+  var dd = JSON.parse(jsonDataRaw);
+
+  document.getElementById("ddModalTitle").innerHTML =
+    '<i class="fa-solid fa-route"></i> Cập Nhật Địa Điểm Du Lịch';
+
+  document.getElementById("dd_id").value = dd.MaDiaDiem;
+  document.getElementById("dd_ten").value = dd.TenDiaDiem;
+  document.getElementById("dd_danhmuc").value = dd.MaDanhMuc;
+  document.getElementById("dd_vungmien").value = dd.VungMien;
+  document.getElementById("dd_diachi").value = dd.DiaChi;
+  document.getElementById("dd_motangan").value = dd.MoTaNgan;
+  document.getElementById("dd_chitiet").value = dd.ChiTiet;
+
+  // Gán tên ảnh cũ vào trường ẩn để phòng trường hợp user không đổi ảnh mới
+  document.getElementById("dd_hinhanh_cu").value = dd.HinhAnhChinh;
+
+  var preview = document.getElementById("img-preview");
+  if (dd.HinhAnhChinh) {
+    preview.src = "../images/" + dd.HinhAnhChinh;
+  } else {
+    preview.src = "../images/du_lich.png";
+  }
+  preview.style.display = "block";
+
+  document.getElementById("diaDiemModal").style.display = "block";
 }
 
 function closeDiaDiemModal() {
-    document.getElementById("diaDiemModal").style.display = "none";
+  document.getElementById("diaDiemModal").style.display = "none";
 }
 
 function saveDiaDiem(e) {
-    e.preventDefault();
-    var formData = new FormData(document.getElementById("formDiaDiem"));
-    var data = new URLSearchParams(formData);
+  e.preventDefault();
 
-    fetch('../QL_Dia_Diem/luu_dia_diem.php', {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: data,
-    })
+  // Sử dụng đối tượng FormData gốc để upload tập tin hình ảnh nhị phân qua AJAX
+  var formData = new FormData(document.getElementById("formDiaDiem"));
+
+  fetch("../QL_Dia_Diem/luu_dia_diem.php", {
+    method: "POST",
+    body: formData,
+  })
     .then((res) => res.text())
     .then((response) => {
-        if (response.trim() === "SUCCESS") {
-            closeDiaDiemModal();
-            // Làm mới vùng content-body để nạp bảng địa điểm vừa cập nhật
-            document.getElementById("main-content-body").innerHTML = '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh sách địa điểm...</div>';
-            fetch(ddUrl).then((r) => r.text()).then((html) => {
-                document.getElementById("main-content-body").innerHTML = html;
-            });
-        } else {
-            alert("Có lỗi xảy ra: " + response);
-        }
-    });
+      if (response.trim() === "SUCCESS") {
+        closeDiaDiemModal();
+        document.getElementById("main-content-body").innerHTML =
+          '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh sách địa điểm...</div>';
+        fetch(ddUrl)
+          .then((r) => r.text())
+          .then((html) => {
+            document.getElementById("main-content-body").innerHTML = html;
+          });
+      } else {
+        alert("Có lỗi xảy ra: " + response);
+      }
+    })
+    .catch((err) => console.error("Lỗi gửi dữ liệu địa điểm:", err));
 }
 
 function xoaDiaDiem(id) {
-    if (confirm("Bạn có chắc chắn muốn xóa địa điểm du lịch này vĩnh viễn không?")) {
-        fetch(ddUrl + "?action=delete&id=" + id)
-            .then((res) => res.text())
-            .then((data) => {
-                if (data.trim() === "SUCCESS") {
-                    fetch(ddUrl).then((r) => r.text()).then((html) => (document.getElementById("main-content-body").innerHTML = html));
-                } else {
-                    alert("Không thể xóa: " + data);
-                }
-            });
-    }
+  if (
+    confirm("Bạn có chắc chắn muốn xóa địa điểm du lịch này vĩnh viễn không?")
+  ) {
+    fetch(ddUrl + "?action=delete&id=" + id)
+      .then((res) => res.text())
+      .then((data) => {
+        if (data.trim() === "SUCCESS") {
+          fetch(ddUrl)
+            .then((r) => r.text())
+            .then(
+              (html) =>
+                (document.getElementById("main-content-body").innerHTML = html),
+            );
+        } else {
+          alert("Không thể xóa: " + data);
+        }
+      });
+  }
 }
 
 // ==========================================
 // 5. CHỨC NĂNG QUẢN LÝ ĐÁNH GIÁ (AJAX)
 // ==========================================
-var dgUrl = "../QL_Danh_Gia/index.php";
+var dgUrl = "../QL_Danh_Gia/ quan_ly_danh_gia.php";
 
 function xoaDanhGia(id) {
-    if (confirm("Bạn có chắc chắn muốn xóa đánh giá/bình luận này không? Hành động này sẽ gỡ bỏ hoàn toàn phản hồi của user khỏi địa điểm du lịch.")) {
-        fetch(dgUrl + "?action=delete&id=" + id)
-            .then((res) => res.text())
-            .then((data) => {
-                if (data.trim() === "SUCCESS") {
-                    // Tải lại ruột bảng đánh giá bằng AJAX
-                    fetch(dgUrl)
-                        .then((r) => r.text())
-                        .then((html) => {
-                            document.getElementById("main-content-body").innerHTML = html;
-                        });
-                } else {
-                    alert("Không thể xóa: " + data);
-                }
-            })
-            .catch((error) => {
-                alert("Lỗi kết nối hệ thống: " + error.message);
+  if (
+    confirm(
+      "Bạn có chắc chắn muốn xóa đánh giá/bình luận này không? Hành động này sẽ gỡ bỏ hoàn toàn phản hồi của user khỏi địa điểm du lịch.",
+    )
+  ) {
+    fetch(dgUrl + "?action=delete&id=" + id)
+      .then((res) => res.text())
+      .then((data) => {
+        if (data.trim() === "SUCCESS") {
+          fetch(dgUrl)
+            .then((r) => r.text())
+            .then((html) => {
+              document.getElementById("main-content-body").innerHTML = html;
             });
-    }
+        } else {
+          alert("Không thể xóa: " + data);
+        }
+      })
+      .catch((error) => {
+        alert("Lỗi kết nối hệ thống: " + error.message);
+      });
+  }
 }
