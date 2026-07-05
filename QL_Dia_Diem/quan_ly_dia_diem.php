@@ -17,7 +17,7 @@ try {
         exit;
     }
 
-    // --- 2. TRUY VẤN LẤY DANH SÁCH ĐỊA ĐIỂM (JOIN với bảng DanhMuc để lấy tên danh mục) ---
+    // --- 2. TRUY VẤN LẤY DANH SÁCH ĐỊA ĐIỂM (JOIN để lấy tên danh mục) ---
     $sqlDiaDiem = "SELECT dd.*, dm.TenDanhMuc 
                    FROM DiaDiem dd 
                    INNER JOIN DanhMuc dm ON dd.MaDanhMuc = dm.MaDanhMuc 
@@ -25,12 +25,12 @@ try {
     $stmtDD = $conn->query($sqlDiaDiem);
     $danhSachDiaDiem = $stmtDD->fetchAll(PDO::FETCH_ASSOC);
 
-    // --- 3. TRUY VẤN LẤY SẴN DANH MỤC (Để phục vụ đổ vào thẻ select trong Modal Form) ---
+    // --- 3. TRUY VẤN LẤY DANH SÁCH DANH MỤC CHO THẺ SELECT ---
     $stmtDM = $conn->query("SELECT MaDanhMuc, TenDanhMuc FROM DanhMuc ORDER BY TenDanhMuc ASC");
     $danhSachDanhMuc = $stmtDM->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    echo 'Lỗi: ' . $e->getMessage();
+    echo 'Lỗi hệ thống: ' . $e->getMessage();
     exit;
 }
 ?>
@@ -59,14 +59,18 @@ try {
                     <tr>
                         <td>#<?php echo $dd['MaDiaDiem']; ?></td>
                         <td>
-                            <img src="<?php echo !empty($dd['HinhAnhChinh']) ? '../images/'.$dd['HinhAnhChinh'] : 'https://picsum.photos/60/40'; ?>" alt="Ảnh" class="table-img" style="width:60px; height:40px; object-fit:cover; border-radius:4px;">
+                            <img src="<?php echo !empty($dd['HinhAnhChinh']) ? '../images/'.$dd['HinhAnhChinh'] : '../images/default.jpg'; ?>" alt="Ảnh địa điểm" class="table-img" style="width:60px; height:40px; object-fit:cover; border-radius:4px;">
                         </td>
                         <td><strong><?php echo htmlspecialchars($dd['TenDiaDiem']); ?></strong></td>
                         <td><span class="badge" style="background-color: #e3f2fd; color: #0d47a1;"><?php echo htmlspecialchars($dd['TenDanhMuc']); ?></span></td>
                         <td><?php echo htmlspecialchars($dd['VungMien']); ?></td>
                         <td><i class="fa-regular fa-eye"></i> <?php echo number_format($dd['LuotXem']); ?></td>
                         <td>
-                            <button class="btn-action btn-edit" onclick="openEditDiaDiemModal(<?php echo $dd['MaDiaDiem']; ?>, '<?php echo addslashes($dd['TenDiaDiem']); ?>', <?php echo $dd['MaDanhMuc']; ?>, '<?php echo $dd['VungMien']; ?>', '<?php echo addslashes($dd['DiaChi']); ?>', '<?php echo addslashes($dd['MoTaNgan']); ?>', '<?php echo addslashes($dd['ChiTiet']); ?>', '<?php echo $dd['HinhAnhChinh']; ?>')" title="Sửa địa điểm">
+                            <?php 
+                            // Mã hóa toàn bộ object địa điểm sang chuỗi JSON an toàn, chống vỡ dòng
+                            $json_data = htmlspecialchars(json_encode($dd, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <button class="btn-action btn-edit" onclick="openEditDiaDiemModal('<?php echo $json_data; ?>')" title="Sửa địa điểm">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                             
@@ -86,7 +90,8 @@ try {
 </div>
 
 <div id="diaDiemModal" class="custom-modal" style="display:none;">
-    <div class="modal-content" style="width: 550px; margin: 4% auto;"> <h3 id="ddModalTitle"></h3>
+    <div class="modal-content" style="width: 550px; margin: 4% auto;"> 
+        <h3 id="ddModalTitle"></h3>
         
         <form id="formDiaDiem" onsubmit="saveDiaDiem(event)">
             <input type="hidden" id="dd_id" name="id">
@@ -123,8 +128,14 @@ try {
             </div>
 
             <div class="form-group">
-                <label>Tên File Hình Ảnh (Đại diện)</label>
-                <input type="text" id="dd_hinhanh" name="hinhanhchinh" class="form-control" placeholder="Ví dụ: halong.jpg (Lưu trong thư mục images)">
+                <label>Hình Ảnh Minh Họa</label>
+                <input type="file" id="dd_file_anh" name="hinhanh_file" accept="image/*" class="form-control" onchange="previewImage(this)">
+                
+                <input type="hidden" id="dd_hinhanh_cu" name="hinhanhchinh_cu">
+                
+                <div style="margin-top: 10px;">
+                    <img id="img-preview" src="" style="max-width: 120px; max-height: 80px; object-fit: cover; border-radius: 4px; display: none; border: 1px dashed #cbd5e1;">
+                </div>
             </div>
 
             <div class="form-group">
