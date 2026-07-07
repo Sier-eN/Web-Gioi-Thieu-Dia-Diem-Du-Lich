@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
       contentBody.innerHTML =
         '<div style="padding: 20px; font-weight: bold; color: #1e3d59;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</div>';
 
-      fetch(url)
+      // Thêm ?v= chống cache khi chuyển phân hệ quản trị
+      fetch(url + (url.includes("?") ? "&" : "?") + "v=" + Date.now())
         .then((response) => {
           if (!response.ok) throw new Error("Không thể tải được trang này.");
           return response.text();
@@ -41,7 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // ==========================================
 // 2. CHỨC NĂNG QUẢN LÝ TÀI KHOẢN (MODAL & AJAX)
 // ==========================================
-var currentUrl = "../QL_Tai_Khoan/quan_ly_tai_khoan.php";
+// ĐỒNG BỘ ĐƯỜNG DẪN TUYỆT ĐỐI CHO PHÂN HỆ TÀI KHOẢN
+var currentUrl = "/GTDDDL/QL_Tai_Khoan/quan_ly_tai_khoan.php";
 
 function openAddModal() {
   document.getElementById("modalTitle").innerHTML =
@@ -100,7 +102,7 @@ function saveTaiKhoan(e) {
   document.getElementById("modal_tendangnhap").disabled = false; // Mở tạm thời để gửi data
   var data = new URLSearchParams(formData);
 
-  fetch("../QL_Tai_Khoan/luu_tai_khoan.php", {
+  fetch("/GTDDDL/QL_Tai_Khoan/luu_tai_khoan.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: data,
@@ -111,7 +113,7 @@ function saveTaiKhoan(e) {
         closeModal();
         document.getElementById("main-content-body").innerHTML =
           '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật dữ liệu...</div>';
-        fetch(currentUrl)
+        fetch(currentUrl + "?v=" + Date.now())
           .then((r) => r.text())
           .then((html) => {
             document.getElementById("main-content-body").innerHTML = html;
@@ -127,11 +129,11 @@ function saveTaiKhoan(e) {
 
 function khoaTaiKhoan(id) {
   if (confirm("Bạn có chắc chắn muốn khóa tài khoản này không?")) {
-    fetch(currentUrl + "?action=delete&id=" + id)
+    fetch(currentUrl + "?action=delete&id=" + id + "&v=" + Date.now())
       .then((res) => res.text())
       .then((data) => {
         if (data.trim() === "SUCCESS") {
-          fetch(currentUrl)
+          fetch(currentUrl + "?v=" + Date.now())
             .then((r) => r.text())
             .then(
               (html) =>
@@ -143,11 +145,11 @@ function khoaTaiKhoan(id) {
 }
 
 function moKhoaTaiKhoan(id) {
-  fetch(currentUrl + "?action=activate&id=" + id)
+  fetch(currentUrl + "?action=activate&id=" + id + "&v=" + Date.now())
     .then((res) => res.text())
     .then((data) => {
       if (data.trim() === "SUCCESS") {
-        fetch(currentUrl)
+        fetch(currentUrl + "?v=" + Date.now())
           .then((r) => r.text())
           .then(
             (html) =>
@@ -163,11 +165,11 @@ function xoaHanTaiKhoan(id) {
       "CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản này không? Hành động này không thể hoàn tác!",
     )
   ) {
-    fetch(currentUrl + "?action=destroy&id=" + id)
+    fetch(currentUrl + "?action=destroy&id=" + id + "&v=" + Date.now())
       .then((res) => res.text())
       .then((data) => {
         if (data.trim() === "SUCCESS") {
-          fetch(currentUrl)
+          fetch(currentUrl + "?v=" + Date.now())
             .then((r) => r.text())
             .then(
               (html) =>
@@ -183,7 +185,7 @@ function xoaHanTaiKhoan(id) {
 // ==========================================
 // 3. CHỨC NĂNG QUẢN LÝ DANH MỤC (MODAL & AJAX)
 // ==========================================
-var dmUrl = "../QL_Danh_Muc/quan_ly_danh_muc.php";
+var dmUrl = "/GTDDDL/QL_Danh_Muc/quan_ly_danh_muc.php";
 
 function openDanhMucModal() {
   document.getElementById("dmModalTitle").innerHTML =
@@ -211,7 +213,7 @@ function saveDanhMuc(e) {
   var formData = new FormData(document.getElementById("formDanhMuc"));
   var data = new URLSearchParams(formData);
 
-  fetch("../QL_Danh_Muc/luu_danh_muc.php", {
+  fetch("/GTDDDL/QL_Danh_Muc/luu_danh_muc.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: data,
@@ -222,7 +224,7 @@ function saveDanhMuc(e) {
         closeDanhMucModal();
         document.getElementById("main-content-body").innerHTML =
           '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh mục...</div>';
-        fetch(dmUrl)
+        fetch(dmUrl + "?v=" + Date.now())
           .then((r) => r.text())
           .then((html) => {
             document.getElementById("main-content-body").innerHTML = html;
@@ -239,11 +241,11 @@ function xoaDanhMuc(id) {
       "LƯU Ý: Xóa danh mục này sẽ đồng thời xóa TẤT CẢ các địa điểm du lịch thuộc danh mục này! Bạn có chắc chắn muốn xóa?",
     )
   ) {
-    fetch(dmUrl + "?action=delete&id=" + id)
+    fetch(dmUrl + "?action=delete&id=" + id + "&v=" + Date.now())
       .then((res) => res.text())
       .then((data) => {
         if (data.trim() === "SUCCESS") {
-          fetch(dmUrl)
+          fetch(dmUrl + "?v=" + Date.now())
             .then((r) => r.text())
             .then(
               (html) =>
@@ -259,9 +261,8 @@ function xoaDanhMuc(id) {
 // ==========================================
 // 4. CHỨC NĂNG QUẢN LÝ ĐỊA ĐIỂM (MODAL & AJAX UPLOAD FILE)
 // ==========================================
-var ddUrl = "../QL_Dia_Diem/quan_ly_dia_diem.php";
+var ddUrl = "/GTDDDL/QL_Dia_Diem/quan_ly_dia_diem.php";
 
-// Hàm xử lý hiển thị ảnh preview nhỏ khi chọn file từ máy tính
 function previewImage(input) {
   var preview = document.getElementById("img-preview");
   if (input.files && input.files[0]) {
@@ -284,7 +285,6 @@ function openDiaDiemModal() {
   document.getElementById("diaDiemModal").style.display = "block";
 }
 
-// GIẢI PHÁP CHỐNG LỖI SỬA: Tiếp nhận chuỗi JSON an toàn từ index.php gửi sang
 function openEditDiaDiemModal(jsonDataRaw) {
   var dd = JSON.parse(jsonDataRaw);
 
@@ -298,8 +298,6 @@ function openEditDiaDiemModal(jsonDataRaw) {
   document.getElementById("dd_diachi").value = dd.DiaChi;
   document.getElementById("dd_motangan").value = dd.MoTaNgan;
   document.getElementById("dd_chitiet").value = dd.ChiTiet;
-
-  // Gán tên ảnh cũ vào trường ẩn để phòng trường hợp user không đổi ảnh mới
   document.getElementById("dd_hinhanh_cu").value = dd.HinhAnhChinh;
 
   var preview = document.getElementById("img-preview");
@@ -319,11 +317,9 @@ function closeDiaDiemModal() {
 
 function saveDiaDiem(e) {
   e.preventDefault();
-
-  // Sử dụng đối tượng FormData gốc để upload tập tin hình ảnh nhị phân qua AJAX
   var formData = new FormData(document.getElementById("formDiaDiem"));
 
-  fetch("../QL_Dia_Diem/luu_dia_diem.php", {
+  fetch("/GTDDDL/QL_Dia_Diem/luu_dia_diem.php", {
     method: "POST",
     body: formData,
   })
@@ -333,7 +329,7 @@ function saveDiaDiem(e) {
         closeDiaDiemModal();
         document.getElementById("main-content-body").innerHTML =
           '<div style="padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lại danh sách địa điểm...</div>';
-        fetch(ddUrl)
+        fetch(ddUrl + "?v=" + Date.now())
           .then((r) => r.text())
           .then((html) => {
             document.getElementById("main-content-body").innerHTML = html;
@@ -349,11 +345,11 @@ function xoaDiaDiem(id) {
   if (
     confirm("Bạn có chắc chắn muốn xóa địa điểm du lịch này vĩnh viễn không?")
   ) {
-    fetch(ddUrl + "?action=delete&id=" + id)
+    fetch(ddUrl + "?action=delete&id=" + id + "&v=" + Date.now())
       .then((res) => res.text())
       .then((data) => {
         if (data.trim() === "SUCCESS") {
-          fetch(ddUrl)
+          fetch(ddUrl + "?v=" + Date.now())
             .then((r) => r.text())
             .then(
               (html) =>
@@ -367,9 +363,9 @@ function xoaDiaDiem(id) {
 }
 
 // ==========================================
-// 5. CHỨC NĂNG QUẢN LÝ ĐÁNH GIÁ (AJAX)
+// 5. CHỨC NĂNG QUẢN LÝ ĐÁNH GIÁ (AJAX) - ĐÃ FIX DẤU CÁCH VÀ ĐƯỜNG DẪN ROOT
 // ==========================================
-var dgUrl = "../QL_Danh_Gia/ quan_ly_danh_gia.php";
+var dgUrl = "/GTDDDL/QL_Danh_Gia/quan_ly_danh_gia.php";
 
 function xoaDanhGia(id) {
   if (
@@ -377,17 +373,23 @@ function xoaDanhGia(id) {
       "Bạn có chắc chắn muốn xóa đánh giá/bình luận này không? Hành động này sẽ gỡ bỏ hoàn toàn phản hồi của user khỏi địa điểm du lịch.",
     )
   ) {
-    fetch(dgUrl + "?action=delete&id=" + id)
+    fetch(dgUrl + "?action=delete&id=" + id + "&v=" + Date.now())
       .then((res) => res.text())
       .then((data) => {
         if (data.trim() === "SUCCESS") {
-          fetch(dgUrl)
+          fetch(dgUrl + "?v=" + Date.now())
             .then((r) => r.text())
             .then((html) => {
               document.getElementById("main-content-body").innerHTML = html;
             });
         } else {
-          alert("Không thể xóa: " + data);
+          if (data.includes("<!DOCTYPE") || data.includes("<html")) {
+            alert(
+              "Lỗi hệ thống: Đường dẫn không chính xác hoặc dính lỗi server (404).",
+            );
+          } else {
+            alert("Không thể xóa: " + data);
+          }
         }
       })
       .catch((error) => {

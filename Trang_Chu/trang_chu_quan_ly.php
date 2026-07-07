@@ -86,6 +86,6 @@ if (!isset($_SESSION['role']) || strcasecmp($_SESSION['role'], 'Admin') !== 0) {
 
     </div>
 
-    <script src="../java_script/admin_script.js"></script>
+    <script src="../java_script/admin_script.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -8,14 +8,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Kiểm tra bảo mật chặt chẽ xem có đúng là đã đăng nhập chưa
-if (!isset($_SESSION['id']) && !isset($_SESSION['mataikhoan'])) {
+// ĐỒNG BỘ CHÍNH XÁC: Lấy đúng biến 'user_id' mà file xu_ly_auth.php vừa tạo ra khi đăng nhập thành công
+$maTaiKhoan = $_SESSION['user_id'] ?? '';
+
+// Kiểm tra bảo mật lớp Server
+if (empty($maTaiKhoan)) {
     echo "Hết phiên làm việc, vui lòng đăng nhập lại.";
     exit;
 }
-
-// Tùy thuộc vào việc khi đăng nhập Nghĩa lưu khóa chính tài khoản vào $_SESSION['id'] hay $_SESSION['mataikhoan']
-$maTaiKhoan = $_SESSION['id'] ?? $_SESSION['mataikhoan'] ?? '';
 
 $host = 'localhost'; $dbname = 'DuLichDB'; $username = 'root'; $password = '';
 try {
@@ -31,7 +31,7 @@ try {
         exit;
     }
 
-    // Chèn dữ liệu chính xác vào bảng DanhGia của Nghĩa
+    // Chèn dữ liệu chính xác vào bảng DanhGia với MaTaiKhoan hợp lệ
     $stmt = $conn->prepare("INSERT INTO DanhGia (MaDiaDiem, MaTaiKhoan, SoSao, NoiDung) VALUES (?, ?, ?, ?)");
     $stmt->execute([$maDiaDiem, $maTaiKhoan, $soSao, $noiDung]);
 
@@ -39,3 +39,4 @@ try {
 } catch (PDOException $e) {
     echo "Lỗi hệ thống database: " . $e->getMessage();
 }
+?>
